@@ -1,0 +1,57 @@
+name: Terraform Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Choose Action"
+        required: true
+        default: "plan_and_apply"
+        type: choice
+        options:
+          - plan_only
+          - plan_and_apply
+
+
+env:
+  TF_VERSION: 1.7.4
+  AWS_REGION: us-west-2
+  TF_WORKING_DIR: ./terraform
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: ${{ env.TF_VERSION }}
+
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Terraform Init
+      working-directory: ${{ env.TF_WORKING_DIR }}
+      run: terraform init
+
+    - name: Terraform Validate
+      working-directory: ${{ env.TF_WORKING_DIR }}
+      run: terraform validate
+
+    - name: Terraform Plan
+      working-directory: ${{ env.TF_WORKING_DIR }}
+      run: terraform plan -out=tfplan
+
+    - name: Terraform Apply
+      if: ${{ github.event.inputs.action == 'plan_and_apply' }}
+      working-directory: ${{ env.TF_WORKING_DIR }}
+      run: terraform apply -auto-approve tfplan
