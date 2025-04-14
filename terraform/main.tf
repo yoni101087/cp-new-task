@@ -33,12 +33,12 @@ module "sqs" {
   source = "./sqs"
 }
 
-module "elb" {
-  source               = "./elb"
-  vpc_id               = var.vpc_id
-  subnets              = var.subnets
-  allowed_inbound_cidr = var.allowed_inbound_cidr
-}
+#module "elb" {
+#  source               = "./elb"
+#  vpc_id               = var.vpc_id
+#  subnets              = var.subnets
+#  allowed_inbound_cidr = var.allowed_inbound_cidr
+#}
 
 module "ecs" {
   source                = "./ecs"
