@@ -33,17 +33,17 @@ module "sqs" {
   source = "./sqs"
 }
 
-#module "elb" {
-#  source               = "./elb"
-#  vpc_id               = var.vpc_id
-#  subnets              = var.subnets
-#  allowed_inbound_cidr = var.allowed_inbound_cidr
-#}
+module "elb" {
+  source               = "./elb"
+  vpc_id               = var.vpc_id
+  subnets              = var.subnets
+  allowed_inbound_cidr = var.allowed_inbound_cidr
+}
 
 module "ecs" {
   source                = "./ecs"
-  vpc_id                = var.vpc_id
-  subnets               = var.subnets
+  vpc_id                = module.vpc.vpc_id
+  subnets               = module.vpc.public_subnets
   elb_security_group_id = module.elb.elb_sg_id
   app1_image            = module.ecr.app1_repository_url
   app2_image            = module.ecr.app2_repository_url
