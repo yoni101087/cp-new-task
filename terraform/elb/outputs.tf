@@ -17,3 +17,7 @@ output "elb_sg_id" {
   description = "The ID of the security group for the ELB"
   value       = aws_security_group.elb_sg.id
 }
+
+output "app2_target_group_arn" {
+  value = aws_lb_target_group.app2_tg.arn
+}

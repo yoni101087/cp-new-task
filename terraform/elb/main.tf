@@ -76,3 +76,24 @@ resource "aws_lb_listener" "app1_listener" {
     target_group_arn = aws_lb_target_group.app1_tg.arn
   }
 }
+
+resource "aws_lb_target_group" "app2_tg" {
+  name        = "app2-tg"
+  port        = local.app_port
+  protocol    = "HTTP"
+  vpc_id      = var.vpc_id
+  target_type = "ip"
+
+  health_check {
+    path                = "/health"
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+    matcher             = "200"
+  }
+
+  tags = {
+    Name = "app2-tg"
+  }
+}
