@@ -6,18 +6,6 @@ variable "token_value" {
 }
 
 
-variable "vpc_id" {
-  description = "The VPC ID where the resources will be deployed"
-  type        = string
-  default     = "vpc-0a12345678abcdef"
-}
-
-variable "subnets" {
-  description = "The list of public subnets for the resources"
-  type        = list(string)
-  default     = ["10.0.1.0/24"]
-}
-
 variable "allowed_inbound_cidr" {
   description = "The CIDR block allowed to access the ALB (e.g., 0.0.0.0/0 for public access)"
   type        = list(string)
