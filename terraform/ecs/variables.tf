@@ -48,3 +48,8 @@ variable "aws_region" {
   type        = string
   default     = "us-west-2"
 }
+
+variable "app2_target_group_arn" {
+  description = "Target Group ARN for app2"
+}
+

@@ -37,3 +37,7 @@ output "app2_service_name" {
   description = "The name of the ECS service for app 2"
   value       = aws_ecs_service.app2.name
 }
+
+output "app2_target_group_arn" {
+  value = aws_lb_target_group.app2_tg.arn
+}

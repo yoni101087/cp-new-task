@@ -36,7 +36,7 @@ module "sqs" {
 module "elb" {
   source               = "./elb"
   vpc_id               = module.vpc.vpc_id
-  subnets              = module.vpc.public_subnets
+  public_subnets = module.vpc.public_subnets
   allowed_inbound_cidr = var.allowed_inbound_cidr
 }
 
@@ -51,6 +51,7 @@ module "ecs" {
   s3_bucket_name        = module.s3.bucket_name
   ssm_param_name        = module.ssm.ssm_parameter_name
   app1_target_group_arn = module.elb.app1_target_group_arn
+  app2_target_group_arn = module.elb.app2_target_group_arn
 }
 
 module "ssm" {

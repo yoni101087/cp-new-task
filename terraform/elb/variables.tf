@@ -3,13 +3,14 @@ variable "vpc_id" {
   type        = string
 }
 
-variable "subnets" {
-  description = "The list of public subnets for the ALB"
-  type        = list(string)
-}
 
 variable "allowed_inbound_cidr" {
   description = "The CIDR blocks allowed to access the ALB"
   type        = list(string)
   default     = ["0.0.0.0/0"]
+}
+
+variable "public_subnets" {
+  description = "Public subnets for the ALB"
+  type        = list(string)
 }
