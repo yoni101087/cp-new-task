@@ -14,7 +14,7 @@ resource "aws_ecs_service" "app1" {
 
   load_balancer {
     target_group_arn = var.app1_target_group_arn
-    container_name   = "app-1-container"
+    container_name   = "app1"    
     container_port   = 5000
   }
 }
@@ -33,4 +33,9 @@ resource "aws_ecs_service" "app2" {
     assign_public_ip = true
   }
 
+  load_balancer {
+    target_group_arn = var.app2_target_group_arn
+    container_name   = "app2"    
+    container_port   = 5000
+  }
 }

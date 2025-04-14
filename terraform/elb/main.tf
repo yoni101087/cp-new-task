@@ -28,13 +28,13 @@ resource "aws_security_group" "elb_sg" {
   }
 }
 
-# ALB Resource
+# Application Load Balancer (ALB)
 resource "aws_lb" "application_lb" {
   name               = "application-lb"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.elb_sg.id]
-  subnets            = var.subnets
+  subnets            = var.public_subnets  
 
   enable_deletion_protection = false
 
