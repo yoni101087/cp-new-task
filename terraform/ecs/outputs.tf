@@ -38,6 +38,3 @@ output "app2_service_name" {
   value       = aws_ecs_service.app2.name
 }
 
-output "app2_target_group_arn" {
-  value = aws_lb_target_group.app2_tg.arn
-}
