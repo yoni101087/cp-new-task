@@ -35,8 +35,8 @@ module "sqs" {
 
 module "elb" {
   source               = "./elb"
-  vpc_id               = var.vpc_id
-  subnets              = var.subnets
+  vpc_id               = module.vpc.vpc_id
+  subnets              = module.vpc.public_subnets
   allowed_inbound_cidr = var.allowed_inbound_cidr
 }
 
