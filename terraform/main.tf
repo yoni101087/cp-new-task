@@ -52,7 +52,7 @@ module "ecs" {
   ssm_param_name        = module.ssm.ssm_parameter_name
   app1_target_group_arn = module.elb.app1_target_group_arn
   app2_target_group_arn = module.elb.app2_target_group_arn
-  lb_dependency = module.elb  # <-- This will enforce dependency
+  lb_dependency         = module.elb  
 }
 
 module "ssm" {

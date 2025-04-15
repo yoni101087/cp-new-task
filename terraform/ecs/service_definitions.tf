@@ -17,7 +17,7 @@ resource "aws_ecs_service" "app1" {
     container_name   = "app1"           # <-- Correct from your task def
     container_port   = 5000
   }
-  depends_on = [aws_lb_listener.app1_listener]
+  depends_on = [var.lb_dependency]
 }
 
 # ECS Service for app 2

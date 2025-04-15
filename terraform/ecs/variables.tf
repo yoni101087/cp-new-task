@@ -54,5 +54,5 @@ variable "app2_target_group_arn" {
 }
 
 variable "lb_dependency" {
-  description = "Dependency to wait for the ALB listener"
+  description = "Dependency for ALB listener to avoid TG not attached error"
 }
