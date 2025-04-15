@@ -14,7 +14,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-
 ENV PULL_INTERVAL=5
 
 CMD ["python", "app.py"]

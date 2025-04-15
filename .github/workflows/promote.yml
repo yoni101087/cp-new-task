@@ -16,7 +16,7 @@ env:
   APP2_SERVICE_NAME: app-2-service
 
 jobs:
-  terraform-destroy:
+  promotion:
     runs-on: ubuntu-latest
 
     steps:
@@ -43,8 +43,6 @@ jobs:
       id: tf_outputs
       working-directory: ${{ env.TF_WORKING_DIR }}
       run: |
-        set -e
-    
         ALB_DNS=$(terraform output -raw alb_dns_name 2>/dev/null || true)
         S3_BUCKET=$(terraform output -raw s3_bucket_name 2>/dev/null || true)
         SQS_QUEUE=$(terraform output -raw sqs_queue_url 2>/dev/null || true)
