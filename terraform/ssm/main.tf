@@ -1,6 +1,7 @@
 resource "aws_ssm_parameter" "token" {
-  name        = "token"
-  description = "Token for app authentication"
+  name        = "${var.environment}-token"
+  description = "Token for Microservice authentication"
   type        = "SecureString"
-  value       = random_password.token.result
+  value       = var.token_value
+
 }
