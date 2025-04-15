@@ -78,40 +78,43 @@ jobs:
         S3_BUCKET_NAME: ${{ steps.tf_outputs.outputs.s3_bucket_name }}
         SQS_QUEUE_URL: ${{ steps.tf_outputs.outputs.sqs_queue_url }}
 
-    - name: Tag latest ECR images as stable and semver
+        - name: Install GitVersion
+        uses: GitTools/actions/gitversion/setup@v1
+        with:
+          versionSpec: '5.x'
+
+    - name: Run GitVersion
+      id: gitversion
+      uses: GitTools/actions/gitversion/execute@v1
+
+    - name: Print calculated version
       run: |
-        VERSION=${{ steps.semver.outputs.version }}
-        CUSTOM_TAG=${{ steps.semver.outputs.custom_tag }}
-    
-        if [[ -z "$VERSION" || -z "$CUSTOM_TAG" ]]; then
-          echo "Missing version or custom_tag. Exiting."
-          exit 1
-        fi
-    
-        for app in app1 app2; do
-          echo "Checking if $app has 'latest' tag..."
+        echo "SemVer: ${{ steps.gitversion.outputs.semVer }}"
+        echo "Stable Tag: stable-${{ steps.gitversion.outputs.majorMinorPatch }}"
+
+    - name: Tag ECR images as stable and versioned
+      run: |
+        VERSION="${{ steps.gitversion.outputs.semVer }}"
+        CUSTOM_TAG="stable-${{ steps.gitversion.outputs.majorMinorPatch }}"
+        for repo in $APP1_REPO $APP2_REPO; do
+          echo "🔍 Checking if '$repo' has 'latest' image..."
           IMAGE_INFO=$(aws ecr describe-images \
-            --repository-name $app \
+            --repository-name $repo \
             --filter tagStatus=TAGGED \
             --query "imageDetails[?contains(imageTags, 'latest')]" \
             --output json)
-    
           if [[ "$IMAGE_INFO" == "[]" ]]; then
-            echo "No 'latest' tag found in $app repository"
+            echo "❌ No 'latest' tag found in $repo"
             exit 1
           fi
-    
-          echo "Tagging $app:latest as $app:stable and $CUSTOM_TAG"
+          echo "📦 Tagging $repo:latest → stable + $CUSTOM_TAG"
           aws ecr batch-get-image \
-            --repository-name $app \
+            --repository-name $repo \
             --image-ids imageTag=latest \
             --query 'images[0].imageManifest' \
             --output text > manifest.json
-    
-          aws ecr put-image --repository-name $app --image-tag stable --image-manifest file://manifest.json
-          aws ecr put-image --repository-name $app --image-tag $CUSTOM_TAG --image-manifest file://manifest.json
+          aws ecr put-image --repository-name $repo --image-tag stable --image-manifest file://manifest.json
+          aws ecr put-image --repository-name $repo --image-tag "$CUSTOM_TAG" --image-manifest file://manifest.json
         done
-      
-      
-      
-  
+    
+    
