@@ -8,6 +8,7 @@ Alison is a app-based application deployed on AWS using Terraform for infrastruc
 
 The infrastructure is defined using Terraform modules:
 
+- **VPC**: Provides networking resources including private/public subnets, route tables, NAT Gateway, and Internet Gateway.
 - **ECS**: Manages the ECS cluster, services, and task definitions for the apps
 - **ECR**: Container registries for both apps
 - **S3**: Storage bucket for app2 outputs
@@ -21,7 +22,7 @@ The CI/CD pipeline consists of three workflows:
 
 1. **CI Workflow**: Builds, tests, and pushes Docker images to ECR
    - Runs unit tests for both apps
-   - Builds Docker images with proper tags
+   - Builds Docker images
    - Pushes images to ECR repositories
 
 2. **CD Workflow**: Deploys services to ECS
