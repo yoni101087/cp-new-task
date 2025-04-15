@@ -69,9 +69,10 @@ jobs:
       - name: Get Terraform Outputs
         id: tf_outputs
         run: |
-          echo "ALB_URL=http://$(terraform output -raw alb_dns_name)" >> $GITHUB_ENV
-          echo "S3_BUCKET_NAME=$(terraform output -raw s3_bucket_name)" >> $GITHUB_ENV
-          echo "SQS_QUEUE_URL=$(terraform output -raw sqs_queue_url)" >> $GITHUB_ENV
+          echo "alb_url=http://$(terraform output -raw alb_dns_name)" >> $GITHUB_OUTPUT
+          echo "s3_bucket_name=$(terraform output -raw s3_bucket_name)" >> $GITHUB_OUTPUT
+          echo "sqs_queue_url=$(terraform output -raw sqs_queue_url)" >> $GITHUB_OUTPUT
+      
 
       - name: Fetch ECS Cluster Name
         id: fetch-cluster-id
@@ -98,7 +99,7 @@ jobs:
               python3 tests/system_test.py
             env:
               AWS_REGION: ${{ env.AWS_REGION }}
-              ALB_URL: ${{ env.ALB_URL }}
-              SQS_QUEUE_URL: ${{ env.SQS_QUEUE_URL }}
-              S3_BUCKET_NAME: ${{ env.S3_BUCKET_NAME }}
+              ALB_URL: ${{ steps.tf_outputs.outputs.alb_url }}
+              S3_BUCKET_NAME: ${{ steps.tf_outputs.outputs.s3_bucket_name }}
+              SQS_QUEUE_URL: ${{ steps.tf_outputs.outputs.sqs_queue_url }}
     
