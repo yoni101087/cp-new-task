@@ -79,3 +79,5 @@ class Testapp1(unittest.TestCase):
         })
         self.assertEqual(response.status_code, 200)
         mock_sqs.assert_called_once()
+
+
