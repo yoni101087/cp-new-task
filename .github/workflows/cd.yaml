@@ -1,4 +1,4 @@
-name: CD 
+name: CD
 
 on:
   workflow_call:
@@ -9,6 +9,8 @@ on:
 
 env:
   AWS_REGION: us-west-2
+  APP1_SERVICE_NAME: app-1-service
+  APP2_SERVICE_NAME: app-2-service
 
 jobs:
   deploy-app1:
@@ -17,68 +19,62 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      
-        
+
       - name: Set up AWS CLI
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
-          
-      - name: Fetch Shared ECS Cluster ID
+
+      - name: Fetch ECS Cluster Name
         id: fetch-cluster-id
         run: |
-          echo "Debug: Listing all ECS clusters in region ${{ env.AWS_REGION }}"
           ECS_CLUSTER_ARN=$(aws ecs list-clusters --query "clusterArns[0]" --output text)
           ECS_CLUSTER_NAME=$(basename "$ECS_CLUSTER_ARN")
-          
+
           if [ -z "$ECS_CLUSTER_NAME" ]; then
             echo "ECS cluster not found."
             exit 1
           fi
-      
+
           echo "ECS_CLUSTER_ID=$ECS_CLUSTER_NAME" >> $GITHUB_ENV
-          echo "ECS Cluster ID: $ECS_CLUSTER_NAME"
-        
-          
-      - name: Deploy app 1 to ECS
+
+      - name: Deploy app1 to ECS
         run: |
           aws ecs update-service --cluster $ECS_CLUSTER_ID \
-            --service app1-service --force-new-deployment
+            --service ${{ env.APP1_SERVICE_NAME }} \
+            --force-new-deployment
 
-  # Second app deployment
   deploy-app2:
     name: Deploy app 2
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-        
-        
+
       - name: Set up AWS CLI
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
-          
-      - name: Fetch Shared ECS Cluster ID
+
+      - name: Fetch ECS Cluster Name
         id: fetch-cluster-id
         run: |
-          echo "Debug: Listing all ECS clusters in region ${{ env.AWS_REGION }}"
           ECS_CLUSTER_ARN=$(aws ecs list-clusters --query "clusterArns[0]" --output text)
           ECS_CLUSTER_NAME=$(basename "$ECS_CLUSTER_ARN")
-          
+
           if [ -z "$ECS_CLUSTER_NAME" ]; then
             echo "ECS cluster not found."
             exit 1
           fi
-      
+
           echo "ECS_CLUSTER_ID=$ECS_CLUSTER_NAME" >> $GITHUB_ENV
-          echo "ECS Cluster ID: $ECS_CLUSTER_NAME"
-          
-      - name: Deploy app 2 to ECS
+
+      - name: Deploy app2 to ECS
         run: |
           aws ecs update-service --cluster $ECS_CLUSTER_ID \
-            --service app2-service --force-new-deployment
+            --service ${{ env.APP2_SERVICE_NAME }} \
+            --force-new-deployment
