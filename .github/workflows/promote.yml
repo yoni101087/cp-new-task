@@ -1,0 +1,84 @@
+name: promote
+
+on:
+  workflow_dispatch:  # Manual only
+
+
+env:
+  TF_VERSION: 1.7.4
+  AWS_REGION: us-west-2
+  TF_WORKING_DIR: ./terraform
+  APP1_SERVICE_NAME: app-1-service
+  APP2_SERVICE_NAME: app-2-service
+
+jobs:
+  terraform-destroy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: ${{ env.TF_VERSION }}
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Terraform Init
+      working-directory: ${{ env.TF_WORKING_DIR }}
+      run: terraform init
+
+    - name: Get Terraform Outputs
+      id: tf_outputs
+      working-directory: ${{ env.TF_WORKING_DIR }}
+      run: |
+        set -e
+    
+        ALB_DNS=$(terraform output -raw alb_dns_name 2>/dev/null || true)
+        S3_BUCKET=$(terraform output -raw s3_bucket_name 2>/dev/null || true)
+        SQS_QUEUE=$(terraform output -raw sqs_queue_url 2>/dev/null || true)
+    
+        if [[ -z "$ALB_DNS" || -z "$S3_BUCKET" || -z "$SQS_QUEUE" ]]; then
+          echo "❌ Missing one or more Terraform outputs. Run terraform apply first."
+          exit 1
+        fi
+    
+        echo "alb_url=http://$ALB_DNS" >> $GITHUB_OUTPUT
+        echo "s3_bucket_name=$S3_BUCKET" >> $GITHUB_OUTPUT
+        echo "sqs_queue_url=$SQS_QUEUE" >> $GITHUB_OUTPUT
+
+
+        - name: Fetch ECS Cluster Name
+        id: fetch-cluster-id
+        run: |
+          ECS_CLUSTER_ARN=$(aws ecs list-clusters --query "clusterArns[0]" --output text)
+          ECS_CLUSTER_NAME=$(basename "$ECS_CLUSTER_ARN")
+
+          if [ -z "$ECS_CLUSTER_NAME" ]; then
+            echo "ECS cluster not found."
+            exit 1
+          fi
+
+          echo "ECS_CLUSTER_ID=$ECS_CLUSTER_NAME" >> $GITHUB_ENV
+
+    - name: Deploy app2 to ECS
+      run: |
+        aws ecs update-service --cluster $ECS_CLUSTER_ID \
+          --service ${{ env.APP2_SERVICE_NAME }} \
+          --force-new-deployment
+          - name: Run System Tests
+          run: |
+            pip3 install boto3 requests
+            python3 tests/system_test.py
+          env:
+            AWS_REGION: ${{ env.AWS_REGION }}
+            ALB_URL: ${{ steps.tf_outputs.outputs.alb_url }}
+            S3_BUCKET_NAME: ${{ steps.tf_outputs.outputs.s3_bucket_name }}
+            SQS_QUEUE_URL: ${{ steps.tf_outputs.outputs.sqs_queue_url }}
