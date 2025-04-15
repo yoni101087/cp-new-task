@@ -63,82 +63,12 @@ output "app2_service_name" {
   value       = module.ecs.app2_service_name
 }
 
-output "app1_target_group_arn" {
-  description = "The ARN of the target group for app1"
-  value       = module.elb.app1_target_group_arn
-}
-output "app2_target_group_arn" {
-  description = "The ARN of the target group for app2"
-  value       = module.elb.app2_target_group_arn
-}
-output "app1_target_group_name" {
-  description = "The name of the target group for app1"
-  value       = module.elb.app1_target_group_name
-}
-
-output "app2_target_group_name" {
-  description = "The name of the target group for app2"
-  value       = module.elb.app2_target_group_name
-}
-
-output "app1_target_group_health_check_url" {
-  description = "The health check URL for app1 target group"
-  value       = module.elb.app1_target_group_health_check_url
-}
-
-output "app2_target_group_health_check_url" {
-  description = "The health check URL for app2 target group"
-  value       = module.elb.app2_target_group_health_check_url
-}
-
-output "app1_target_group_arn" {
-  description = "The ARN of the target group for app1"
-  value       = module.elb.app1_target_group_arn
-}
-
-output "app2_target_group_arn" {
-  description = "The ARN of the target group for app2"
-  value       = module.elb.app2_target_group_arn
-}
-output "app1_target_group_name" {
-  description = "The name of the target group for app1"
-  value       = module.elb.app1_target_group_name
-}
-
-output "app2_target_group_name" {
-  description = "The name of the target group for app2"
-  value       = module.elb.app2_target_group_name
-}
-
-output "app1_target_group_health_check_url" {
-  description = "The health check URL for app1 target group"
-  value       = module.elb.app1_target_group_health_check_url
-}
-
-output "app2_target_group_health_check_url" {
-  description = "The health check URL for app2 target group"
-  value       = module.elb.app2_target_group_health_check_url
-}
-
-output "app1_target_group_arn" {
-  description = "The ARN of the target group for app1"
-  value       = module.elb.app1_target_group_arn
-}
-
-output "app2_target_group_arn" {
-  description = "The ARN of the target group for app2"
-  value       = module.elb.app2_target_group_arn
-}
-
-output "app1_target_group_name" {
-  description = "The name of the target group for app1"
-  value       = module.elb.app1_target_group_name
-}
-
 output "alb_dns_name" {
-  description = "DNS name of the Application Load Balancer"
+  description = "The DNS name of the Application Load Balancer"
   value       = module.elb.alb_dns_name
 }
+
+
 
 output "alb_arn" {
   description = "ARN of the Application Load Balancer"
