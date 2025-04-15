@@ -78,8 +78,10 @@ jobs:
         S3_BUCKET_NAME: ${{ steps.tf_outputs.outputs.s3_bucket_name }}
         SQS_QUEUE_URL: ${{ steps.tf_outputs.outputs.sqs_queue_url }}
 
-    - name: Tag latest ECR images as stable
+    - name: Tag latest ECR images as stable and semver
       run: |
+        VERSION=${{ steps.semver.outputs.version }}
+    
         for app in app1 app2; do
           echo "Checking if $app has 'latest' tag..."
           IMAGE_INFO=$(aws ecr describe-images \
@@ -87,23 +89,29 @@ jobs:
             --filter tagStatus=TAGGED \
             --query "imageDetails[?contains(imageTags, 'latest')]" \
             --output json)
-        
+    
           if [[ "$IMAGE_INFO" == "[]" ]]; then
             echo "No 'latest' tag found in $app repository"
             exit 1
           fi
-        
-          echo "Tagging $app:latest as $app:stable..."
+    
+          echo "Tagging $app:latest as $app:stable and $VERSION"
           aws ecr batch-get-image \
             --repository-name $app \
             --image-ids imageTag=latest \
             --query 'images[0].imageManifest' \
             --output text > manifest.json
-        
+    
           aws ecr put-image \
             --repository-name $app \
             --image-tag stable \
             --image-manifest file://manifest.json
+    
+          aws ecr put-image \
+            --repository-name $app \
+            --image-tag $VERSION \
+            --image-manifest file://manifest.json
         done
+      
       
   
