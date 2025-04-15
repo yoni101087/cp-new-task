@@ -60,6 +60,19 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
+  
+      - name: Init Terraform
+        run: terraform init
+
+      - name: Get Terraform Outputs
+        id: tf_outputs
+        run: |
+          echo "ALB_URL=http://$(terraform output -raw alb_dns_name)" >> $GITHUB_ENV
+          echo "S3_BUCKET_NAME=$(terraform output -raw s3_bucket_name)" >> $GITHUB_ENV
+          echo "SQS_QUEUE_URL=$(terraform output -raw sqs_queue_url)" >> $GITHUB_ENV
+
       - name: Fetch ECS Cluster Name
         id: fetch-cluster-id
         run: |
@@ -78,3 +91,14 @@ jobs:
           aws ecs update-service --cluster $ECS_CLUSTER_ID \
             --service ${{ env.APP2_SERVICE_NAME }} \
             --force-new-deployment
+
+            - name: Run System Tests
+            run: |
+              pip3 install boto3 requests
+              python3 tests/system_test.py
+            env:
+              AWS_REGION: ${{ env.AWS_REGION }}
+              ALB_URL: ${{ env.ALB_URL }}
+              SQS_QUEUE_URL: ${{ env.SQS_QUEUE_URL }}
+              S3_BUCKET_NAME: ${{ env.S3_BUCKET_NAME }}
+    
