@@ -27,6 +27,17 @@ resource "aws_s3_bucket_policy" "main_bucket_policy" {
     Version = "2012-10-17"
     Statement = [
       {
+        Sid       = "DenyPublicAccess"
+        Effect    = "Deny"
+        Principal = "*"
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject"
+        ]
+        Resource = "${aws_s3_bucket.main_bucket.arn}/*"
+      },
+      {
         Sid    = "AllowECSAccess"
         Effect = "Allow"
         Principal = {
