@@ -67,3 +67,30 @@ output "alb_dns_name" {
   description = "The DNS name of the Application Load Balancer"
   value       = module.elb.alb_dns_name
 }
+
+# ALB (ELB) Outputs
+output "alb_dns_name" {
+  description = "DNS name of the Application Load Balancer"
+  value       = module.elb.alb_dns_name
+}
+
+output "alb_arn" {
+  description = "ARN of the Application Load Balancer"
+  value       = module.elb.alb_arn
+}
+
+# VPC Outputs
+output "vpc_id" {
+  description = "The ID of the VPC"
+  value       = module.vpc.vpc_id
+}
+
+output "public_subnet_ids" {
+  description = "IDs of the public subnets"
+  value       = module.vpc.public_subnets
+}
+
+output "private_subnet_ids" {
+  description = "IDs of the private subnets"
+  value       = module.vpc.private_subnets
+}
