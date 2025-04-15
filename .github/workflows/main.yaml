@@ -39,7 +39,7 @@ jobs:
   trigger-promotion:
     name: Trigger promotion
     needs: trigger-cd
-    uses: ./.github/workflows/promote.yml
+    uses: ./.github/workflows/systemtests.yml
     with:
       environment: dev  
     secrets: inherit
