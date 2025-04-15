@@ -29,12 +29,10 @@ jobs:
       - name: Fetch Shared ECS Cluster ID
         id: fetch-cluster-id
         run: |
-          echo "Fetching ECS Cluster ID for environment: ${{ inputs.environment }}"
           echo "Debug: Listing all ECS clusters in region ${{ env.AWS_REGION }}"
           aws ecs list-clusters --output json
-          ECS_CLUSTER_ID=$(aws ecs list-clusters --query "clusterArns[?contains(@, '${{ inputs.environment }}')]" --output text)
+          ECS_CLUSTER_ID=$(aws ecs list-clusters --query "clusterArns[?contains(@)]" --output text)
           if [ -z "$ECS_CLUSTER_ID" ]; then
-            echo "Error: ECS Cluster ID not found for environment: ${{ inputs.environment }}"
             echo "Ensure the cluster exists, the name matches, and the region is correct."
             exit 1
           fi
@@ -44,7 +42,7 @@ jobs:
       - name: Deploy app 1 to ECS
         run: |
           aws ecs update-service --cluster $ECS_CLUSTER_ID \
-            --service ${{ inputs.environment }}-app1-service --force-new-deployment
+            --service app1-service --force-new-deployment
 
   # Second app deployment
   deploy-app2:
@@ -65,12 +63,10 @@ jobs:
       - name: Fetch Shared ECS Cluster ID
         id: fetch-cluster-id
         run: |
-          echo "Fetching ECS Cluster ID for environment: ${{ inputs.environment }}"
           echo "Debug: Listing all ECS clusters in region ${{ env.AWS_REGION }}"
           aws ecs list-clusters --output json
-          ECS_CLUSTER_ID=$(aws ecs list-clusters --query "clusterArns[?contains(@, '${{ inputs.environment }}')]" --output text)
+          ECS_CLUSTER_ID=$(aws ecs list-clusters --query "clusterArns[?contains(@)]" --output text)
           if [ -z "$ECS_CLUSTER_ID" ]; then
-            echo "Error: ECS Cluster ID not found for environment: ${{ inputs.environment }}"
             echo "Ensure the cluster exists, the name matches, and the region is correct."
             exit 1
           fi
@@ -80,4 +76,4 @@ jobs:
       - name: Deploy app 2 to ECS
         run: |
           aws ecs update-service --cluster $ECS_CLUSTER_ID \
-            --service ${{ inputs.environment }}-app2-service --force-new-deployment
+            --service app2-service --force-new-deployment
