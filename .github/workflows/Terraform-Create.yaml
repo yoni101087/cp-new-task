@@ -54,4 +54,6 @@ jobs:
     - name: Terraform Apply
       if: ${{ github.event.inputs.action == 'plan_and_apply' }}
       working-directory: ${{ env.TF_WORKING_DIR }}
-      run: terraform apply -auto-approve tfplan
+      #run: terraform apply -auto-approve tfplan
+      run: terraform apply -target=aws_ecs_service.app1 -target=aws_ecs_service.app2 -auto-approve
+
