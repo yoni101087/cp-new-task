@@ -30,14 +30,17 @@ jobs:
         id: fetch-cluster-id
         run: |
           echo "Debug: Listing all ECS clusters in region ${{ env.AWS_REGION }}"
-          aws ecs list-clusters --output json
-          ECS_CLUSTER_ID=$(aws ecs list-clusters --query "clusterArns[?contains(@)]" --output text)
-          if [ -z "$ECS_CLUSTER_ID" ]; then
-            echo "Ensure the cluster exists, the name matches, and the region is correct."
+          ECS_CLUSTER_ARN=$(aws ecs list-clusters --query "clusterArns[0]" --output text)
+          ECS_CLUSTER_NAME=$(basename "$ECS_CLUSTER_ARN")
+          
+          if [ -z "$ECS_CLUSTER_NAME" ]; then
+            echo "ECS cluster not found."
             exit 1
           fi
-          echo "ECS_CLUSTER_ID=$ECS_CLUSTER_ID" >> $GITHUB_ENV
-          echo "ECS Cluster ID: $ECS_CLUSTER_ID"
+      
+          echo "ECS_CLUSTER_ID=$ECS_CLUSTER_NAME" >> $GITHUB_ENV
+          echo "ECS Cluster ID: $ECS_CLUSTER_NAME"
+        
           
       - name: Deploy app 1 to ECS
         run: |
@@ -64,14 +67,16 @@ jobs:
         id: fetch-cluster-id
         run: |
           echo "Debug: Listing all ECS clusters in region ${{ env.AWS_REGION }}"
-          aws ecs list-clusters --output json
-          ECS_CLUSTER_ID=$(aws ecs list-clusters --query "clusterArns[?contains(@)]" --output text)
-          if [ -z "$ECS_CLUSTER_ID" ]; then
-            echo "Ensure the cluster exists, the name matches, and the region is correct."
+          ECS_CLUSTER_ARN=$(aws ecs list-clusters --query "clusterArns[0]" --output text)
+          ECS_CLUSTER_NAME=$(basename "$ECS_CLUSTER_ARN")
+          
+          if [ -z "$ECS_CLUSTER_NAME" ]; then
+            echo "ECS cluster not found."
             exit 1
           fi
-          echo "ECS_CLUSTER_ID=$ECS_CLUSTER_ID" >> $GITHUB_ENV
-          echo "ECS Cluster ID: $ECS_CLUSTER_ID"
+      
+          echo "ECS_CLUSTER_ID=$ECS_CLUSTER_NAME" >> $GITHUB_ENV
+          echo "ECS Cluster ID: $ECS_CLUSTER_NAME"
           
       - name: Deploy app 2 to ECS
         run: |
