@@ -78,10 +78,10 @@ jobs:
         S3_BUCKET_NAME: ${{ steps.tf_outputs.outputs.s3_bucket_name }}
         SQS_QUEUE_URL: ${{ steps.tf_outputs.outputs.sqs_queue_url }}
 
-        - name: Install GitVersion
-        uses: GitTools/actions/gitversion/setup@v1
-        with:
-          versionSpec: '5.x'
+    - name: Install GitVersion
+      uses: GitTools/actions/gitversion/setup@v1
+      with:
+        versionSpec: '5.x'
 
     - name: Run GitVersion
       id: gitversion
