@@ -5,6 +5,7 @@ resource "aws_ecr_repository" "app1" {
     scan_on_push = true
   }
 
+  force_delete = true
 }
 
 resource "aws_ecr_repository" "app2" {
@@ -14,4 +15,5 @@ resource "aws_ecr_repository" "app2" {
     scan_on_push = true
   }
 
+  force_delete = true
 }
