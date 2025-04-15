@@ -100,12 +100,12 @@ jobs:
       run: |
         VERSION="${{ steps.gitversion.outputs.semVer }}"
         CUSTOM_TAG="stable-${{ steps.gitversion.outputs.majorMinorPatch }}"
-
+    
         if [[ -z "$VERSION" || -z "$CUSTOM_TAG" ]]; then
           echo "Missing version or custom_tag. Exiting."
           exit 1
         fi
-
+    
         for repo in $APP1_REPO $APP2_REPO; do
           echo "🔍 Checking if '$repo' has 'latest' image..."
           IMAGE_INFO=$(aws ecr describe-images \
@@ -113,18 +113,20 @@ jobs:
             --filter tagStatus=TAGGED \
             --query "imageDetails[?contains(imageTags, 'latest')]" \
             --output json)
-
+    
           if [[ "$IMAGE_INFO" == "[]" ]]; then
             echo "❌ No 'latest' tag found in $repo"
             exit 1
           fi
-
+    
           echo "📦 Tagging $repo:latest → stable + $CUSTOM_TAG"
           aws ecr batch-get-image \
             --repository-name $repo \
             --image-ids imageTag=latest \
             --query 'images[0].imageManifest' \
             --output text > manifest.json
-
+    
           aws ecr put-image --repository-name $repo --image-tag stable --image-manifest file://manifest.json
           aws ecr put-image --repository-name $repo --image-tag "$CUSTOM_TAG" --image-manifest file://manifest.json
+        done
+      
