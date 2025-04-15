@@ -20,18 +20,24 @@ The infrastructure is defined using Terraform modules:
 
 The CI/CD pipeline consists of three workflows:
 
-1. **CI Workflow**: Builds, tests, and pushes Docker images to ECR
-   - Runs unit tests for both apps
-   - Builds Docker images
-   - Pushes images to ECR repositories
+1. **CI Workflow**: Builds, tests, and pushes Docker images to ECR  
+   - Runs unit tests for both apps  
+   - Builds Docker images  
+   - Pushes images to ECR repositories  
 
-2. **CD Workflow**: Deploys services to ECS
-   - Updates ECS services to use the latest container images
-   - Forces new deployments
+2. **CD Workflow**: Deploys services to ECS  
+   - Updates ECS services to use the latest container images  
+   - Forces new deployments  
 
-3. **Main Pipeline**: Orchestrates CI and CD workflows
-   - Runs on pushes to the main branch
-   - Can be manually triggered to deploy to specific environments
+3. **SystemTests Workflow**: Runs system/integration tests and promotes images  
+   - Fetches Terraform outputs (ALB, S3, SQS)  
+   - Runs system tests against the live environment  
+   - Uses GitVersion to generate semantic version tags  
+   - Tags the `latest` image in ECR as `stable` and `stable-<version>`  
+
+4. **Main Pipeline**: Orchestrates CI, CD, and SystemTests workflows  
+   - Runs on pushes to the main branch  
+   - Can be manually triggered to deploy to specific environments  
 
 ## Project Setup Guide
 
