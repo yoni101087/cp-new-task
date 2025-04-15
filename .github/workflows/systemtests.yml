@@ -16,7 +16,7 @@ env:
   APP2_SERVICE_NAME: app-2-service
 
 jobs:
-  promotion:
+  systemtests:
     runs-on: ubuntu-latest
 
     steps:
@@ -77,3 +77,30 @@ jobs:
         ALB_URL: ${{ steps.tf_outputs.outputs.alb_url }}
         S3_BUCKET_NAME: ${{ steps.tf_outputs.outputs.s3_bucket_name }}
         SQS_QUEUE_URL: ${{ steps.tf_outputs.outputs.sqs_queue_url }}
+
+    - name: Tag latest ECR images as stable
+      run: |
+        for app in app1 app2; do
+          IMAGE_URI=$(aws ecr describe-images \
+            --repository-name $app \
+            --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags[?@=="latest"]' \
+            --output text)
+
+          if [[ -z "$IMAGE_URI" ]]; then
+            echo "No 'latest' tag found in $app repository"
+            exit 1
+          fi
+
+          echo "Tagging $app:latest as $app:stable..."
+          aws ecr batch-get-image \
+            --repository-name $app \
+            --image-ids imageTag=latest \
+            --query 'images[0].imageManifest' \
+            --output text > manifest.json
+
+          aws ecr put-image \
+            --repository-name $app \
+            --image-tag stable \
+            --image-manifest file://manifest.json
+        done
+  
