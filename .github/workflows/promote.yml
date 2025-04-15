@@ -57,30 +57,23 @@ jobs:
         echo "sqs_queue_url=$SQS_QUEUE" >> $GITHUB_OUTPUT
 
 
-        - name: Fetch ECS Cluster Name
-        id: fetch-cluster-id
-        run: |
-          ECS_CLUSTER_ARN=$(aws ecs list-clusters --query "clusterArns[0]" --output text)
-          ECS_CLUSTER_NAME=$(basename "$ECS_CLUSTER_ARN")
-
-          if [ -z "$ECS_CLUSTER_NAME" ]; then
-            echo "ECS cluster not found."
-            exit 1
-          fi
-
-          echo "ECS_CLUSTER_ID=$ECS_CLUSTER_NAME" >> $GITHUB_ENV
-
-    - name: Deploy app2 to ECS
+    - name: Fetch ECS Cluster Name
+      id: fetch-cluster-id
       run: |
-        aws ecs update-service --cluster $ECS_CLUSTER_ID \
-          --service ${{ env.APP2_SERVICE_NAME }} \
-          --force-new-deployment
-          - name: Run System Tests
-          run: |
-            pip3 install boto3 requests
-            python3 tests/system_test.py
-          env:
-            AWS_REGION: ${{ env.AWS_REGION }}
-            ALB_URL: ${{ steps.tf_outputs.outputs.alb_url }}
-            S3_BUCKET_NAME: ${{ steps.tf_outputs.outputs.s3_bucket_name }}
-            SQS_QUEUE_URL: ${{ steps.tf_outputs.outputs.sqs_queue_url }}
+        ECS_CLUSTER_ARN=$(aws ecs list-clusters --query "clusterArns[0]" --output text)
+        ECS_CLUSTER_NAME=$(basename "$ECS_CLUSTER_ARN")
+        if [ -z "$ECS_CLUSTER_NAME" ]; then
+          echo "ECS cluster not found."
+          exit 1
+        fi
+        echo "ECS_CLUSTER_ID=$ECS_CLUSTER_NAME" >> $GITHUB_ENV
+
+    - name: Run System Tests
+      run: |
+        pip3 install boto3 requests
+        python3 tests/system_test.py
+      env:
+        AWS_REGION: ${{ env.AWS_REGION }}
+        ALB_URL: ${{ steps.tf_outputs.outputs.alb_url }}
+        S3_BUCKET_NAME: ${{ steps.tf_outputs.outputs.s3_bucket_name }}
+        SQS_QUEUE_URL: ${{ steps.tf_outputs.outputs.sqs_queue_url }}
