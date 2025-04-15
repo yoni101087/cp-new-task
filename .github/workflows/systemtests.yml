@@ -81,26 +81,29 @@ jobs:
     - name: Tag latest ECR images as stable
       run: |
         for app in app1 app2; do
-          IMAGE_URI=$(aws ecr describe-images \
+          echo "Checking if $app has 'latest' tag..."
+          IMAGE_INFO=$(aws ecr describe-images \
             --repository-name $app \
-            --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags[?@=="latest"]' \
-            --output text)
-
-          if [[ -z "$IMAGE_URI" ]]; then
+            --filter tagStatus=TAGGED \
+            --query "imageDetails[?contains(imageTags, 'latest')]" \
+            --output json)
+        
+          if [[ "$IMAGE_INFO" == "[]" ]]; then
             echo "No 'latest' tag found in $app repository"
             exit 1
           fi
-
+        
           echo "Tagging $app:latest as $app:stable..."
           aws ecr batch-get-image \
             --repository-name $app \
             --image-ids imageTag=latest \
             --query 'images[0].imageManifest' \
             --output text > manifest.json
-
+        
           aws ecr put-image \
             --repository-name $app \
             --image-tag stable \
             --image-manifest file://manifest.json
         done
+      
   
