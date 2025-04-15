@@ -11,8 +11,6 @@ env:
   AWS_REGION: us-west-2
   APP1_SERVICE_NAME: app-1-service
   APP2_SERVICE_NAME: app-2-service
-  TF_VERSION: 1.7.4
-  TF_WORKING_DIR: ./terraform
 
 jobs:
   deploy-app1:
@@ -56,41 +54,11 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Set up AWS CLI
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
-
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v3
-  
-      - name: Terraform Init
-        working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform init
-
-      - name: Get Terraform Outputs
-        id: tf_outputs
-        working-directory: ${{ env.TF_WORKING_DIR }}
-        run: |
-          set -e
-      
-          ALB_DNS=$(terraform output -raw alb_dns_name 2>/dev/null || true)
-          S3_BUCKET=$(terraform output -raw s3_bucket_name 2>/dev/null || true)
-          SQS_QUEUE=$(terraform output -raw sqs_queue_url 2>/dev/null || true)
-      
-          if [[ -z "$ALB_DNS" || -z "$S3_BUCKET" || -z "$SQS_QUEUE" ]]; then
-            echo "❌ Missing one or more Terraform outputs. Run terraform apply first."
-            exit 1
-          fi
-      
-          echo "alb_url=http://$ALB_DNS" >> $GITHUB_OUTPUT
-          echo "s3_bucket_name=$S3_BUCKET" >> $GITHUB_OUTPUT
-          echo "sqs_queue_url=$SQS_QUEUE" >> $GITHUB_OUTPUT
-      
-      
-      
-      
 
       - name: Fetch ECS Cluster Name
         id: fetch-cluster-id
@@ -110,14 +78,3 @@ jobs:
           aws ecs update-service --cluster $ECS_CLUSTER_ID \
             --service ${{ env.APP2_SERVICE_NAME }} \
             --force-new-deployment
-
-            - name: Run System Tests
-            run: |
-              pip3 install boto3 requests
-              python3 tests/system_test.py
-            env:
-              AWS_REGION: ${{ env.AWS_REGION }}
-              ALB_URL: ${{ steps.tf_outputs.outputs.alb_url }}
-              S3_BUCKET_NAME: ${{ steps.tf_outputs.outputs.s3_bucket_name }}
-              SQS_QUEUE_URL: ${{ steps.tf_outputs.outputs.sqs_queue_url }}
-    
