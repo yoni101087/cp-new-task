@@ -65,7 +65,7 @@ module "ecr" {
 }
 
 module "cloudwatch" {
-  source = "./modules/cloudwatch"
+  source = "./cloudwatch"
 
   retention_in_days = 7
 }
