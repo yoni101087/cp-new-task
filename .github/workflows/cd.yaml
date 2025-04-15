@@ -69,9 +69,18 @@ jobs:
       - name: Get Terraform Outputs
         id: tf_outputs
         run: |
-          echo "alb_url=http://$(terraform output -raw alb_dns_name)" >> $GITHUB_OUTPUT
-          echo "s3_bucket_name=$(terraform output -raw s3_bucket_name)" >> $GITHUB_OUTPUT
-          echo "sqs_queue_url=$(terraform output -raw sqs_queue_url)" >> $GITHUB_OUTPUT
+          ALB_DNS=$(terraform output -raw alb_dns_name 2>/dev/null || echo "")
+          S3_BUCKET=$(terraform output -raw s3_bucket_name 2>/dev/null || echo "")
+          SQS_QUEUE=$(terraform output -raw sqs_queue_url 2>/dev/null || echo "")
+      
+          if [ -z "$ALB_DNS" ] || [ -z "$S3_BUCKET" ] || [ -z "$SQS_QUEUE" ]; then
+            echo "❌ One or more Terraform outputs are missing. Did you run terraform apply?"
+            exit 1
+          fi
+      
+          echo "alb_url=http://$ALB_DNS" >> $GITHUB_OUTPUT
+          echo "s3_bucket_name=$S3_BUCKET" >> $GITHUB_OUTPUT
+          echo "sqs_queue_url=$SQS_QUEUE" >> $GITHUB_OUTPUT
       
 
       - name: Fetch ECS Cluster Name
