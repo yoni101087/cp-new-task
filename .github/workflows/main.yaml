@@ -35,3 +35,11 @@ jobs:
     with:
       environment: dev  
     secrets: inherit
+
+  trigger-promotion:
+    name: Trigger promotion
+    needs: trigger-cd
+    uses: ./.github/workflows/promote.yml
+    with:
+      environment: dev  
+    secrets: inherit
