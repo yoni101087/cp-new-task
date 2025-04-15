@@ -34,7 +34,7 @@ resource "aws_lb" "application_lb" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.elb_sg.id]
-  subnets            = var.public_subnets  
+  subnets            = [var.public_subnets[0]]  
 
   enable_deletion_protection = false
 
