@@ -7,13 +7,14 @@ on:
         required: true
         type: string
 
-
 env:
   TF_VERSION: 1.7.4
   AWS_REGION: us-west-2
   TF_WORKING_DIR: ./terraform
   APP1_SERVICE_NAME: app-1-service
   APP2_SERVICE_NAME: app-2-service
+  APP1_REPO: app1
+  APP2_REPO: app2
 
 jobs:
   systemtests:
@@ -22,6 +23,8 @@ jobs:
     steps:
     - name: Checkout repo
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Required for GitVersion
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
@@ -46,26 +49,27 @@ jobs:
         ALB_DNS=$(terraform output -raw alb_dns_name 2>/dev/null || true)
         S3_BUCKET=$(terraform output -raw s3_bucket_name 2>/dev/null || true)
         SQS_QUEUE=$(terraform output -raw sqs_queue_url 2>/dev/null || true)
-    
+
         if [[ -z "$ALB_DNS" || -z "$S3_BUCKET" || -z "$SQS_QUEUE" ]]; then
           echo "❌ Missing one or more Terraform outputs. Run terraform apply first."
           exit 1
         fi
-    
+
         echo "alb_url=http://$ALB_DNS" >> $GITHUB_OUTPUT
         echo "s3_bucket_name=$S3_BUCKET" >> $GITHUB_OUTPUT
         echo "sqs_queue_url=$SQS_QUEUE" >> $GITHUB_OUTPUT
-
 
     - name: Fetch ECS Cluster Name
       id: fetch-cluster-id
       run: |
         ECS_CLUSTER_ARN=$(aws ecs list-clusters --query "clusterArns[0]" --output text)
         ECS_CLUSTER_NAME=$(basename "$ECS_CLUSTER_ARN")
+
         if [ -z "$ECS_CLUSTER_NAME" ]; then
           echo "ECS cluster not found."
           exit 1
         fi
+
         echo "ECS_CLUSTER_ID=$ECS_CLUSTER_NAME" >> $GITHUB_ENV
 
     - name: Run System Tests
@@ -96,6 +100,12 @@ jobs:
       run: |
         VERSION="${{ steps.gitversion.outputs.semVer }}"
         CUSTOM_TAG="stable-${{ steps.gitversion.outputs.majorMinorPatch }}"
+
+        if [[ -z "$VERSION" || -z "$CUSTOM_TAG" ]]; then
+          echo "Missing version or custom_tag. Exiting."
+          exit 1
+        fi
+
         for repo in $APP1_REPO $APP2_REPO; do
           echo "🔍 Checking if '$repo' has 'latest' image..."
           IMAGE_INFO=$(aws ecr describe-images \
@@ -103,18 +113,18 @@ jobs:
             --filter tagStatus=TAGGED \
             --query "imageDetails[?contains(imageTags, 'latest')]" \
             --output json)
+
           if [[ "$IMAGE_INFO" == "[]" ]]; then
             echo "❌ No 'latest' tag found in $repo"
             exit 1
           fi
+
           echo "📦 Tagging $repo:latest → stable + $CUSTOM_TAG"
           aws ecr batch-get-image \
             --repository-name $repo \
             --image-ids imageTag=latest \
             --query 'images[0].imageManifest' \
             --output text > manifest.json
+
           aws ecr put-image --repository-name $repo --image-tag stable --image-manifest file://manifest.json
           aws ecr put-image --repository-name $repo --image-tag "$CUSTOM_TAG" --image-manifest file://manifest.json
-        done
-    
-    

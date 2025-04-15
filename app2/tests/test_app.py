@@ -98,6 +98,3 @@ class Testapp2(unittest.TestCase):
         self.assertTrue(result)
         mock_put.assert_called_once()
         self.assertEqual(mock_put.call_args[1]['Body'], 'Plain text message')
-
-
-
