@@ -14,7 +14,7 @@ resource "aws_ecs_service" "app1" {
 
   load_balancer {
     target_group_arn = var.app1_target_group_arn
-    container_name   = "app1"    
+    container_name   = "app1"           # <-- Correct from your task def
     container_port   = 5000
   }
 }
@@ -33,4 +33,10 @@ resource "aws_ecs_service" "app2" {
     assign_public_ip = true
   }
 
+  # Uncomment this if app2 has ALB:
+  # load_balancer {
+  #   target_group_arn = var.app2_target_group_arn
+  #   container_name   = "app2-container"   # From task def
+  #   container_port   = 5000
+  # }
 }
