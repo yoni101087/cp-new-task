@@ -53,3 +53,6 @@ variable "app2_target_group_arn" {
   description = "Target Group ARN for app2"
 }
 
+variable "lb_dependency" {
+  description = "Dependency to wait for the ALB listener"
+}
