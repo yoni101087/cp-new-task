@@ -63,3 +63,9 @@ module "ssm" {
 module "ecr" {
   source = "./ecr"
 }
+
+module "cloudwatch" {
+  source = "./modules/cloudwatch"
+
+  retention_in_days = 7
+}
