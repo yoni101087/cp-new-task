@@ -33,6 +33,11 @@ output "ecs_cluster_id" {
   value       = module.ecs.ecs_cluster_id
 }
 
+output "app1_log_group_name" {
+  value = module.cloudwatch.app1_log_group_name
+}
+
+
 output "app1_task_definition_arn" {
   description = "The ARN of the ECS task definition for app1"
   value       = module.ecs.app1_task_definition_arn
