@@ -80,17 +80,14 @@ jobs:
           SQS_QUEUE=$(terraform output -raw sqs_queue_url 2>/dev/null || true)
       
           if [[ -z "$ALB_DNS" || -z "$S3_BUCKET" || -z "$SQS_QUEUE" ]]; then
-            echo "❌ Missing one or more Terraform outputs. Did you forget terraform apply?"
-            echo "alb_url=" >> $GITHUB_OUTPUT
-            echo "s3_bucket_name=" >> $GITHUB_OUTPUT
-            echo "sqs_queue_url=" >> $GITHUB_OUTPUT
+            echo "❌ Missing one or more Terraform outputs. Run terraform apply first."
             exit 1
           fi
       
-          # Only echo valid key=value pairs if all outputs exist
           echo "alb_url=http://$ALB_DNS" >> $GITHUB_OUTPUT
           echo "s3_bucket_name=$S3_BUCKET" >> $GITHUB_OUTPUT
           echo "sqs_queue_url=$SQS_QUEUE" >> $GITHUB_OUTPUT
+      
       
       
       
