@@ -81,6 +81,12 @@ jobs:
     - name: Tag latest ECR images as stable and semver
       run: |
         VERSION=${{ steps.semver.outputs.version }}
+        CUSTOM_TAG=${{ steps.semver.outputs.custom_tag }}
+    
+        if [[ -z "$VERSION" || -z "$CUSTOM_TAG" ]]; then
+          echo "Missing version or custom_tag. Exiting."
+          exit 1
+        fi
     
         for app in app1 app2; do
           echo "Checking if $app has 'latest' tag..."
@@ -95,23 +101,17 @@ jobs:
             exit 1
           fi
     
-          echo "Tagging $app:latest as $app:stable and $VERSION"
+          echo "Tagging $app:latest as $app:stable and $CUSTOM_TAG"
           aws ecr batch-get-image \
             --repository-name $app \
             --image-ids imageTag=latest \
             --query 'images[0].imageManifest' \
             --output text > manifest.json
     
-          aws ecr put-image \
-            --repository-name $app \
-            --image-tag stable \
-            --image-manifest file://manifest.json
-    
-          aws ecr put-image \
-            --repository-name $app \
-            --image-tag $VERSION \
-            --image-manifest file://manifest.json
+          aws ecr put-image --repository-name $app --image-tag stable --image-manifest file://manifest.json
+          aws ecr put-image --repository-name $app --image-tag $CUSTOM_TAG --image-manifest file://manifest.json
         done
+      
       
       
   

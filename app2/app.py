@@ -194,3 +194,6 @@ if __name__ == '__main__':
     shutdown_event.set()  # Ensure the event is set
     message_thread.join(timeout=30)  # Wait up to 30 seconds
     logger.info("Shutdown complete")
+
+
+    
