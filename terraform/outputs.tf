@@ -37,6 +37,11 @@ output "app1_log_group_name" {
   value = module.cloudwatch.app1_log_group_name
 }
 
+output "app2_log_group_name" {
+  value = module.cloudwatch.app2_log_group_name
+}
+
+
 
 output "app1_task_definition_arn" {
   description = "The ARN of the ECS task definition for app1"
