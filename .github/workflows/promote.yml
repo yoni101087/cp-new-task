@@ -1,7 +1,11 @@
 name: promote
 
 on:
-  workflow_dispatch:  # Manual only
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
 
 
 env:
