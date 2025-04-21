@@ -81,10 +81,30 @@ The CI/CD pipeline consists of three workflows:
 - **app1**: RESTful API that validates inputs and sends messages to SQS
 - **app2**: Background worker that processes SQS messages and stores them in S3
 
+## How app1 and app2 Work Together
+
+- **app1**: A RESTful API that acts as the entry point for external requests. It validates incoming data and sends messages to an AWS SQS queue for further processing.
+- **app2**: A background worker that processes messages from the SQS queue and stores the data in an AWS S3 bucket.
+
+### Workflow
+1. **Client Interaction**:
+   - A client sends a request to app1 via the Application Load Balancer (ALB).
+   - app1 validates the request and sends the data to the SQS queue.
+
+2. **Message Processing**:
+   - app2 retrieves the message from the SQS queue, processes it, and stores the data in the S3 bucket.
+
+3. **Data Flow**:
+   - **app1** → **SQS** → **app2** → **S3**
+
+### Key Features
+- **Decoupling**: app1 and app2 are decoupled using SQS, ensuring app1 can handle client requests quickly without waiting for app2 to process the data.
+- **Scalability**: Both apps can scale independently. For example:
+  - If there is a high volume of incoming requests, app1 can scale horizontally to handle more traffic.
+  - If there are many messages in the SQS queue, app2 can scale to process them faster.
+- **Reliability**: SQS ensures that messages are not lost, even if app2 is temporarily unavailable.
+
 ## Monitoring with prometheus and grafana #TODO
-
-
-
 
 ## Triggering apps via ALB
 
@@ -113,7 +133,6 @@ Field descriptions:
 - `email_timestream`: A timestamp (in Unix format) indicating when the email was created
 - `email_content`: The body content of the email message
 - `token`: A secure token used for authentication (should match the one in SSM)
-
 
 ```bash
 cd app1
