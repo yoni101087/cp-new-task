@@ -8,6 +8,8 @@ import logging
 from threading import Thread
 from botocore.exceptions import ClientError
 
+
+
 app = Flask(__name__)
 
 # Improve logging with timestamps and log level
